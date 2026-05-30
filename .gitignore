@@ -1,0 +1,28 @@
+# Backend
+**/myenv/
+**/venv/
+**/.env
+**/__pycache__/
+**/*.pyc
+**/db.sqlite3
+**/staticfiles/
+**/media/
+**/profile/
+**/resume/
+**/projects/
+
+# Frontend
+**/node_modules/
+**/dist/
+
+# Git
+.gitmodules
+
+# Env files
+**/.env.production
+**/.env.local
+
+# General
+.vscode/
+Thumbs.db
+*.log
