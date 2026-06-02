@@ -1,6 +1,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+import cloudinary
 import dj_database_url 
 load_dotenv()
 
@@ -20,6 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'corsheaders',
+    'cloudinary',
+    'cloudinary_storage',
     'main',
 ]
 
@@ -201,3 +204,12 @@ CORS_ALLOWED_ORIGINS = [
     "https://babitaacharya.com.np",
     "https://www.babitaacharya.com.np",
 ] + [o.strip() for o in os.getenv('CORS_ORIGINS', '').split(',') if o.strip()]
+
+
+cloudinary.config(
+    cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
+    api_key=os.getenv('CLOUDINARY_API_KEY'),
+    api_secret=os.getenv('CLOUDINARY_API_SECRET'),
+)
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
