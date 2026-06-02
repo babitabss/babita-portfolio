@@ -1,7 +1,7 @@
 from pathlib import Path
 from dotenv import load_dotenv
 import os
-import cloudinary
+
 import dj_database_url 
 load_dotenv()
 
@@ -205,6 +205,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://www.babitaacharya.com.np",
 ] + [o.strip() for o in os.getenv('CORS_ORIGINS', '').split(',') if o.strip()]
 
+
+import cloudinary
 
 cloudinary.config(
     cloud_name=os.getenv('CLOUDINARY_CLOUD_NAME'),
