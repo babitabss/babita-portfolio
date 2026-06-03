@@ -5,6 +5,17 @@ const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "/api",
 })
 
+const CLOUD_NAME = "dmzhbrwns"
+
+// Converts any image field from the API into a working Cloudinary https:// URL
+export const toImageUrl = (path: string | null | undefined): string => {
+  if (!path) return ""
+  // Already a full URL (http/https) — return as-is
+  if (path.startsWith("http")) return path
+  // Cloudinary relative path — build full URL
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${path}`
+}
+
 export const getProfile = async (): Promise<Profile> => {
   const res = await api.get<Profile[]>("/profile/")
   return res.data[0]
