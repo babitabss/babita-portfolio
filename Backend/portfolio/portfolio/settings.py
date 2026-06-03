@@ -133,7 +133,7 @@ cloudinary.config(
     api_secret = CLOUDINARY_API_SECRET,
     secure     = True,   # ← forces https:// URLs so images actually load
 )
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
 
 # ─── EMAIL ─────────────────────────────────────────
 # FIX: Use port 465 + SSL (Render blocks 587/TLS)
