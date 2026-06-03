@@ -25,4 +25,3 @@ class ContactSerializer(serializers.ModelSerializer):
     class Meta:
         model = Contact
         fields = ['name', 'email', 'subject', 'message']
-        exclude = ['is_read', 'sent_at']     
