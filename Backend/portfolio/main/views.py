@@ -11,22 +11,41 @@ from .serializers import (
     SkillSerializer,
     ContactSerializer,
 )
+import threading
+
+
+def send_email_async(subject, message, from_email, recipient_list):
+    try:
+        send_mail(
+            subject=subject,
+            message=message,
+            from_email=from_email,
+            recipient_list=recipient_list,
+            fail_silently=True,
+        )
+    except Exception:
+        pass
+
 
 class ProfileViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
 
+
 class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Project.objects.all().order_by('order', '-created_at')
     serializer_class = ProjectSerializer
+
 
 class ExperienceViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Experience.objects.all().order_by('order', '-start_date')
     serializer_class = ExperienceSerializer
 
+
 class SkillViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Skill.objects.all().order_by('order', 'name')
     serializer_class = SkillSerializer
+
 
 class ContactViewSet(viewsets.ModelViewSet):
     queryset = Contact.objects.all()
@@ -38,20 +57,19 @@ class ContactViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         contact = serializer.save()
 
-        try:
-            if settings.EMAIL_HOST_USER and settings.NOTIFY_EMAIL:
-                send_mail(
-                    subject=f"[Portfolio] New message: {contact.subject}",
-                    message=(
-                        f"From: {contact.name} <{contact.email}>\n\n"
-                        f"{contact.message}"
-                    ),
-                    from_email=settings.EMAIL_HOST_USER,
-                    recipient_list=[settings.NOTIFY_EMAIL],
-                    fail_silently=True,
-                )
-        except Exception:
-            pass
+        # Send email in background thread — never blocks or crashes the response
+        if settings.EMAIL_HOST_USER and settings.NOTIFY_EMAIL:
+            thread = threading.Thread(
+                target=send_email_async,
+                args=(
+                    f"[Portfolio] New message: {contact.subject}",
+                    f"From: {contact.name} <{contact.email}>\n\n{contact.message}",
+                    settings.EMAIL_HOST_USER,
+                    [settings.NOTIFY_EMAIL],
+                ),
+                daemon=True,
+            )
+            thread.start()
 
         return Response(
             {"detail": "Message sent successfully!"},
