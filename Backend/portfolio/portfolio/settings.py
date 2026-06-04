@@ -4,7 +4,7 @@ import os
 import dj_database_url
 import cloudinary
 
-load_dotenv()
+load_dotenv(override=False)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
