@@ -3,25 +3,14 @@ from cloudinary.utils import cloudinary_url
 from .models import Profile, Project, Contact, Experience, Skill
 
 
-def get_image_url(value):
-    """Convert CloudinaryField image to full https:// URL."""
+def get_cloudinary_url(value, resource_type="image"):
+    """Convert CloudinaryField value to full https:// URL."""
     if not value:
         return None
     url = str(value)
     if url.startswith("http"):
         return url
-    result, _ = cloudinary_url(url, secure=True, resource_type="image")
-    return result
-
-
-def get_raw_url(value):
-    """Convert CloudinaryField raw file (PDF etc) to full https:// URL."""
-    if not value:
-        return None
-    url = str(value)
-    if url.startswith("http"):
-        return url
-    result, _ = cloudinary_url(url, secure=True, resource_type="raw")
+    result, _ = cloudinary_url(url, secure=True, resource_type=resource_type)
     return result
 
 
@@ -30,10 +19,10 @@ class ProfileSerializer(serializers.ModelSerializer):
     resume      = serializers.SerializerMethodField()
 
     def get_profile_img(self, obj):
-        return get_image_url(obj.profile_img)
+        return get_cloudinary_url(obj.profile_img, resource_type="image")
 
     def get_resume(self, obj):
-        return get_raw_url(obj.resume)
+        return get_cloudinary_url(obj.resume, resource_type="image")
 
     class Meta:
         model = Profile
@@ -44,7 +33,7 @@ class ProjectSerializer(serializers.ModelSerializer):
     image = serializers.SerializerMethodField()
 
     def get_image(self, obj):
-        return get_image_url(obj.image)
+        return get_cloudinary_url(obj.image, resource_type="image")
 
     class Meta:
         model = Project
