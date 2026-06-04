@@ -3,15 +3,18 @@ from dotenv import load_dotenv
 import os
 import dj_database_url
 import cloudinary
+import cloudinary.uploader
+import cloudinary.api
 
+# Load .env but never override system environment variables
 load_dotenv(override=False)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'fallback-secret-key-change-in-production')
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'fallback-secret-key')
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = os.getenv(
+ALLOWED_HOSTS = os.environ.get(
     'ALLOWED_HOSTS',
     'localhost,127.0.0.1,babita-portfolio-api.onrender.com'
 ).split(',')
@@ -62,7 +65,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'portfolio.wsgi.application'
 
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
     DATABASES = {
         'default': dj_database_url.config(
@@ -93,7 +96,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = []
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -106,7 +108,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:5174",
     "https://babitaacharya.com.np",
     "https://www.babitaacharya.com.np",
-] + [o.strip() for o in os.getenv('CORS_ORIGINS', '').split(',') if o.strip()]
+] + [o.strip() for o in os.environ.get('CORS_ORIGINS', '').split(',') if o.strip()]
 
 CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
@@ -118,33 +120,33 @@ REST_FRAMEWORK = {
     ],
 }
 
-# ─── MEDIA / CLOUDINARY ────────────────────────────
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# ─── CLOUDINARY ────────────────────────────────────
+# Using os.environ.get (not os.getenv) to bypass .env file
+CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME', 'dmzhbrwns')
+CLOUDINARY_API_KEY    = os.environ.get('CLOUDINARY_API_KEY', '644799232381731')
+CLOUDINARY_API_SECRET = os.environ.get('CLOUDINARY_API_SECRET', 'mi5g9bpJYIKJpOWdDoKmCgtBqpM')
 
-CLOUDINARY_CLOUD_NAME = os.getenv('CLOUDINARY_CLOUD_NAME')
-CLOUDINARY_API_KEY    = os.getenv('CLOUDINARY_API_KEY')
-CLOUDINARY_API_SECRET = os.getenv('CLOUDINARY_API_SECRET')
-
-# FIX: Always configure Cloudinary and use it for file storage
 cloudinary.config(
     cloud_name = CLOUDINARY_CLOUD_NAME,
     api_key    = CLOUDINARY_API_KEY,
     api_secret = CLOUDINARY_API_SECRET,
-    secure     = True,   # ← forces https:// URLs so images actually load
+    secure     = True,
 )
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.RawMediaCloudinaryStorage'
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 # ─── EMAIL ─────────────────────────────────────────
-# FIX: Use port 465 + SSL (Render blocks 587/TLS)
 EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST          = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT          = int(os.getenv('EMAIL_PORT', 465))
+EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 465))
 EMAIL_USE_TLS       = False
 EMAIL_USE_SSL       = True
-EMAIL_HOST_USER     = os.getenv('EMAIL_HOST_USER', '')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
-NOTIFY_EMAIL        = os.getenv('NOTIFY_EMAIL', '')
+EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+NOTIFY_EMAIL        = os.environ.get('NOTIFY_EMAIL', '')
 
 # ─── JAZZMIN ───────────────────────────────────────
 JAZZMIN_SETTINGS = {
@@ -161,13 +163,13 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
     "icons": {
-        "auth":           "fas fa-users-cog",
-        "auth.user":      "fas fa-user",
-        "main.profile":   "fas fa-id-card",
-        "main.skill":     "fas fa-code",
-        "main.project":   "fas fa-project-diagram",
-        "main.experience":"fas fa-briefcase",
-        "main.contact":   "fas fa-envelope",
+        "auth":            "fas fa-users-cog",
+        "auth.user":       "fas fa-user",
+        "main.profile":    "fas fa-id-card",
+        "main.skill":      "fas fa-code",
+        "main.project":    "fas fa-project-diagram",
+        "main.experience": "fas fa-briefcase",
+        "main.contact":    "fas fa-envelope",
     },
     "default_icon_parents":  "fas fa-chevron-circle-right",
     "default_icon_children": "fas fa-circle",
@@ -179,7 +181,6 @@ JAZZMIN_SETTINGS = {
     "changeform_format": "horizontal_tabs",
 }
 
-# FIX: removed deprecated dark_mode_theme, use default_theme_mode instead
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
     "footer_small_text": False,
